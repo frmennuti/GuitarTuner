@@ -11,3 +11,7 @@ E4: 329.6 Hz
 Microphone: https://www.adafruit.com/product/1063
 
 Microcontroller: STM32F303 Nucleo board
+
+Fourier Transform:
+- maximum frequency to be sampled and recognized is 329.6 Hz (E4)
+- fft resolution should be of at least 3Hz (more or less 10 bins between the 2 tones nearer to each other: E2 and A2)
