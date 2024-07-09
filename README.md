@@ -9,3 +9,5 @@ B3: 246.9 Hz
 E4: 329.6 Hz
 
 Microphone: https://www.adafruit.com/product/1063
+
+Microcontroller: STM32F303 Nucleo board
