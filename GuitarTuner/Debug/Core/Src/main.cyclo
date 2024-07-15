@@ -1,0 +1,11 @@
+../Core/Src/main.c:76:5:main	1
+../Core/Src/main.c:129:6:SystemClock_Config	4
+../Core/Src/main.c:177:13:MX_ADC1_Init	4
+../Core/Src/main.c:243:13:MX_TIM6_Init	3
+../Core/Src/main.c:281:13:MX_TIM7_Init	3
+../Core/Src/main.c:319:13:MX_USART2_UART_Init	2
+../Core/Src/main.c:352:13:MX_DMA_Init	1
+../Core/Src/main.c:370:13:MX_GPIO_Init	1
+../Core/Src/main.c:403:6:HAL_ADC_ConvHalfCpltCallback	1
+../Core/Src/main.c:407:7:HAL_ADC_ConvCpltCallback	1
+../Core/Src/main.c:417:6:Error_Handler	1

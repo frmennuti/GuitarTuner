@@ -31,7 +31,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define ADC_BUFFER_LENGTH 1024
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -49,7 +49,7 @@ TIM_HandleTypeDef htim7;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+uint32_t buffer_adc[ADC_BUFFER_LENGTH];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -104,7 +104,9 @@ int main(void)
   MX_TIM6_Init();
   MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
-
+  HAL_ADC_Start_DMA(&hadc1, buffer_adc, ADC_BUFFER_LENGTH);
+  HAL_TIM_Base_Start(&htim6);
+  HAL_TIM_Base_Start(&htim7);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -114,6 +116,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  HAL_Delay(150);
+	  HAL_GPIO_TogglePin(GPIOA, Trace1_Pin);
   }
   /* USER CODE END 3 */
 }
@@ -376,7 +380,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, Trace0_Pin|Trace1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
@@ -384,19 +388,26 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : LD2_Pin */
-  GPIO_InitStruct.Pin = LD2_Pin;
+  /*Configure GPIO pins : Trace0_Pin Trace1_Pin */
+  GPIO_InitStruct.Pin = Trace0_Pin|Trace1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
-
+void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
+{
+	//HAL_GPIO_TogglePin(GPIOA, Trace0_Pin);
+}
+void  HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+	HAL_GPIO_TogglePin(GPIOA, Trace0_Pin);
+}
 /* USER CODE END 4 */
 
 /**
