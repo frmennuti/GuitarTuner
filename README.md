@@ -26,6 +26,8 @@ Each time 1024 samples gets acquired (alternatively halfcomplete and complete ca
 This will ensure responsiveness requirement and the resolution requirement since performing fft on a 2048 elements array sampled with fs=5120Hz will provide us 1024 bins up to the fs/2=2560Hz component, therefore each bin will have resolution 2560/1024=2,5Hz
 
 SW Architecture:
-The architecture is based upon Real Time Active Object implementation (https://github.com/QuantumLeaps/FreeACT?tab=readme-ov-file#directories-and-files).
-The framework is based upon the FreeRTOS real time operating system.
+FreeRTOS is used as a Real Time Operating System.
+Two tasks are instantiated: DMATask and fftTask
+- DMATask gets notified by the ISR (HalfCplt e ConvCplt), once the notification is received the corresponding last 1024 samples are copied from the adc_buffer used by the DMA to the "parkbuffer", once done that the task notifies the ffttask
+- fftTask shall copy the newer 1024 samples from the park buffer to the buffer of 20048 element used for the fft algoorithm calculation, cast them from uint32 to float, discard the oldest 1024 elements in the buffer and then trigger a fft evaluation
 

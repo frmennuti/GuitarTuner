@@ -22,7 +22,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <string.h>
+#include "task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -33,6 +34,8 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define ADC_BUFFER_LENGTH 2048
+#define PARK_BUFFER_LENGTH (ADC_BUFFER_LENGTH / 2)
+#define FFT_BUFFER_LENGTH ADC_BUFFER_LENGTH
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -49,15 +52,26 @@ TIM_HandleTypeDef htim7;
 
 UART_HandleTypeDef huart2;
 
-/* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
+/* Definitions for DMATask */
+osThreadId_t DMATaskHandle;
+const osThreadAttr_t DMATask_attributes = {
+  .name = "DMATask",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for fftTask */
+osThreadId_t fftTaskHandle;
+const osThreadAttr_t fftTask_attributes = {
+  .name = "fftTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityBelowNormal7,
+};
 /* USER CODE BEGIN PV */
-uint32_t buffer_adc[ADC_BUFFER_LENGTH];
+uint32_t buffer_adc [ADC_BUFFER_LENGTH];
+
+uint32_t park_buffer [ADC_BUFFER_LENGTH / 2];
+
+float fft_buffer [FFT_BUFFER_LENGTH];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -68,7 +82,8 @@ static void MX_USART2_UART_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_TIM6_Init(void);
 static void MX_TIM7_Init(void);
-void StartDefaultTask(void *argument);
+void StartDMATask(void *argument);
+void StartfftTaskTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -114,9 +129,7 @@ int main(void)
   MX_TIM6_Init();
   MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
-  HAL_ADC_Start_DMA(&hadc1, buffer_adc, ADC_BUFFER_LENGTH);
-  HAL_TIM_Base_Start(&htim6);
-  HAL_TIM_Base_Start(&htim7);
+
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -139,8 +152,11 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  /* creation of DMATask */
+  DMATaskHandle = osThreadNew(StartDMATask, NULL, &DMATask_attributes);
+
+  /* creation of fftTask */
+  fftTaskHandle = osThreadNew(StartfftTaskTask, NULL, &fftTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -162,8 +178,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  HAL_Delay(150);
-	  HAL_GPIO_TogglePin(GPIOA, Trace1_Pin);
+	  //HAL_Delay(150);
+	  //HAL_GPIO_TogglePin(GPIOA, Trace1_Pin);
   }
   /* USER CODE END 3 */
 }
@@ -448,30 +464,83 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
 {
+	//BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+	/* Notify the task that the transmission is complete. */
+	vTaskNotifyGiveFromISR( DMATaskHandle, pdFALSE );
 	//HAL_GPIO_TogglePin(GPIOA, Trace0_Pin);
 }
 void  HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
-	HAL_GPIO_TogglePin(GPIOA, Trace0_Pin);
+	//BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+	/* Notify the task that the transmission is complete. */
+	vTaskNotifyGiveFromISR( DMATaskHandle, pdFALSE );
+	//HAL_GPIO_TogglePin(GPIOA, Trace0_Pin);
 }
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartDefaultTask */
+/* USER CODE BEGIN Header_StartDMATask */
 /**
-  * @brief  Function implementing the defaultTask thread.
+  * @brief  Function implementing the DMATask thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
+/* USER CODE END Header_StartDMATask */
+void StartDMATask(void *argument)
 {
   /* USER CODE BEGIN 5 */
+  uint32_t DMAnotificationValue;
+
+  HAL_ADC_Start_DMA(&hadc1, buffer_adc, ADC_BUFFER_LENGTH);
+
+  HAL_TIM_Base_Start(&htim6);
+  HAL_TIM_Base_Start(&htim7);
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+	  DMAnotificationValue = ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
+	  if(DMAnotificationValue == 1)
+	  {
+		  HAL_GPIO_WritePin(GPIOA, Trace0_Pin, GPIO_PIN_SET);
+		  memcpy(park_buffer, buffer_adc, sizeof(uint32_t)*PARK_BUFFER_LENGTH);
+		  xTaskNotifyGive(fftTaskHandle);
+	  }
+	  else
+		  HAL_GPIO_TogglePin(GPIOA, Trace1_Pin);
+
   }
   /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_StartfftTaskTask */
+/**
+* @brief Function implementing the fftTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartfftTaskTask */
+void StartfftTaskTask(void *argument)
+{
+  /* USER CODE BEGIN StartfftTaskTask */
+  uint32_t fftnotificationValue;
+  /* Infinite loop */
+  for(;;)
+  {
+	  fftnotificationValue = ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
+	  if(fftnotificationValue == 1)
+	  {
+		  HAL_GPIO_WritePin(GPIOA, Trace0_Pin, GPIO_PIN_RESET);
+
+		  //copiare da park a fft_buffer
+		  //eseguire la fft
+	  }
+	  else
+		  HAL_GPIO_TogglePin(GPIOA, Trace1_Pin);
+  }
+  /* USER CODE END StartfftTaskTask */
 }
 
 /**
