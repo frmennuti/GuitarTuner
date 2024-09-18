@@ -1,9 +1,0 @@
-../Core/Src/FreeAct.c:37:6:Active_ctor	16	static
-../Core/Src/FreeAct.c:43:13:Active_eventLoop	32	static,ignoring_inline_asm
-../Core/Src/FreeAct.c:65:6:Active_start	56	static,ignoring_inline_asm
-../Core/Src/FreeAct.c:96:6:Active_post	24	static,ignoring_inline_asm
-../Core/Src/FreeAct.c:102:6:Active_postFromISR	32	static,ignoring_inline_asm
-../Core/Src/FreeAct.c:115:6:TimeEvent_ctor	40	static,ignoring_inline_asm
-../Core/Src/FreeAct.c:129:6:TimeEvent_arm	56	static,ignoring_inline_asm
-../Core/Src/FreeAct.c:155:6:TimeEvent_disarm	48	static,ignoring_inline_asm
-../Core/Src/FreeAct.c:179:13:TimeEvent_callback	24	static

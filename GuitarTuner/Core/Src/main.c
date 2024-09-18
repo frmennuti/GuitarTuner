@@ -17,9 +17,11 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+#define ARM_MATH_CM4
+
 #include "main.h"
 #include "cmsis_os.h"
-
+#include "arm_math.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <string.h>
@@ -72,6 +74,12 @@ uint32_t buffer_adc [ADC_BUFFER_LENGTH];
 uint32_t park_buffer [ADC_BUFFER_LENGTH / 2];
 
 float fft_buffer [FFT_BUFFER_LENGTH];
+
+float fft_buffer_result [FFT_BUFFER_LENGTH];
+
+arm_rfft_fast_instance_f32 fftHandler;
+
+uint8_t fftFlag = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -130,6 +138,7 @@ int main(void)
   MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
 
+  arm_rfft_fast_init_f32(&fftHandler, FFT_BUFFER_LENGTH);
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -521,10 +530,15 @@ void StartDMATask(void *argument)
 * @retval None
 */
 /* USER CODE END Header_StartfftTaskTask */
+#define INITIALIZATION		0U
+#define FIRST_HALF			1U
+#define SECOND_HALF			2U
+
 void StartfftTaskTask(void *argument)
 {
   /* USER CODE BEGIN StartfftTaskTask */
   uint32_t fftnotificationValue;
+  uint32_t cnt;
   /* Infinite loop */
   for(;;)
   {
@@ -534,8 +548,17 @@ void StartfftTaskTask(void *argument)
 	  {
 		  HAL_GPIO_WritePin(GPIOA, Trace0_Pin, GPIO_PIN_RESET);
 
-		  //copiare da park a fft_buffer
+		  // Sposta la parte "vecchia" (primi 1024 campioni) nella seconda metà del buffer FFT
+		  memcpy(&fft_buffer[PARK_BUFFER_LENGTH], fft_buffer, PARK_BUFFER_LENGTH * sizeof(float));
+
+		  // Copia e converte i nuovi campioni da uint32_t a float
+		  for (cnt = 0; cnt < PARK_BUFFER_LENGTH; cnt++)
+		  {
+			  fft_buffer[cnt] = (float)park_buffer[cnt];  // Conversione da uint32_t a float
+		  }
+
 		  //eseguire la fft
+		  arm_rfft_fast_f32(&fftHandler, fft_buffer, fft_buffer_result, 0);
 	  }
 	  else
 		  HAL_GPIO_TogglePin(GPIOA, Trace1_Pin);
