@@ -25,6 +25,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <string.h>
+#include <stdbool.h>
 #include "task.h"
 /* USER CODE END Includes */
 
@@ -70,8 +71,6 @@ const osThreadAttr_t fftTask_attributes = {
 };
 /* USER CODE BEGIN PV */
 uint32_t buffer_adc [ADC_BUFFER_LENGTH];
-
-uint32_t park_buffer [ADC_BUFFER_LENGTH / 2];
 
 float fft_buffer [FFT_BUFFER_LENGTH];
 
@@ -499,6 +498,8 @@ void  HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 void StartDMATask(void *argument)
 {
   /* USER CODE BEGIN 5 */
+  static bool sampled_first_half = true;
+
   uint32_t DMAnotificationValue;
 
   HAL_ADC_Start_DMA(&hadc1, buffer_adc, ADC_BUFFER_LENGTH);
@@ -513,7 +514,29 @@ void StartDMATask(void *argument)
 	  if(DMAnotificationValue == 1)
 	  {
 		  HAL_GPIO_WritePin(GPIOA, Trace0_Pin, GPIO_PIN_SET);
-		  memcpy(park_buffer, buffer_adc, sizeof(uint32_t)*PARK_BUFFER_LENGTH);
+
+		  //potrei evitare che questa operazione venga eseguita una volta, la
+		  //prima volta che arrivo qui ma mi sembra un marginal gain dato che
+		  //tutte le altre volte che viene qua deve eseguirla. Una FSM, per
+		  //quanto elegante sembra un overkill e mi sembra renda il codice più
+		  //complesso da leggere e manutenere. Da implementare qualora le
+		  //elaborazioni da fare qui risultino più complesse
+		  memcpy(fft_buffer, &fft_buffer[PARK_BUFFER_LENGTH], sizeof(float)*PARK_BUFFER_LENGTH);
+
+		  if(sampled_first_half)
+		  {
+			  for(int i = 0; i<PARK_BUFFER_LENGTH; i++)
+				  fft_buffer[PARK_BUFFER_LENGTH+i] = (float)buffer_adc[i];
+		  }
+		  else
+		  {
+			  for(int i = 0; i<PARK_BUFFER_LENGTH; i++)
+				  fft_buffer[PARK_BUFFER_LENGTH+i] = (float)buffer_adc[PARK_BUFFER_LENGTH+i];
+		  }
+
+		  //punto al prossimo inizio del blocco da 1024 elementi in buffer adc
+		  sampled_first_half = !sampled_first_half;
+
 		  xTaskNotifyGive(fftTaskHandle);
 	  }
 	  else
@@ -538,7 +561,6 @@ void StartfftTaskTask(void *argument)
 {
   /* USER CODE BEGIN StartfftTaskTask */
   uint32_t fftnotificationValue;
-  uint32_t cnt;
   /* Infinite loop */
   for(;;)
   {
@@ -547,15 +569,6 @@ void StartfftTaskTask(void *argument)
 	  if(fftnotificationValue == 1)
 	  {
 		  HAL_GPIO_WritePin(GPIOA, Trace0_Pin, GPIO_PIN_RESET);
-
-		  // Sposta la parte "vecchia" (primi 1024 campioni) nella seconda metà del buffer FFT
-		  memcpy(&fft_buffer[PARK_BUFFER_LENGTH], fft_buffer, PARK_BUFFER_LENGTH * sizeof(float));
-
-		  // Copia e converte i nuovi campioni da uint32_t a float
-		  for (cnt = 0; cnt < PARK_BUFFER_LENGTH; cnt++)
-		  {
-			  fft_buffer[cnt] = (float)park_buffer[cnt];  // Conversione da uint32_t a float
-		  }
 
 		  //eseguire la fft
 		  arm_rfft_fast_f32(&fftHandler, fft_buffer, fft_buffer_result, 0);
