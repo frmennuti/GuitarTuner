@@ -37,21 +37,21 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_rnglists 0000118b  00000000  00000000  00057ce8  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  0000407c  00000000  00000000  00058e73  2**0
+ 17 .debug_macro  00004060  00000000  00000000  00058e73  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   0001f48b  00000000  00000000  0005ceef  2**0
+ 18 .debug_line   0001f48b  00000000  00000000  0005ced3  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    000e0188  00000000  00000000  0007c37a  2**0
+ 19 .debug_str    000e014b  00000000  00000000  0007c35e  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .comment      000000bc  00000000  00000000  0015c502  2**0
+ 20 .comment      000000bc  00000000  00000000  0015c4a9  2**0
                   CONTENTS, READONLY
- 21 .debug_frame  000065bc  00000000  00000000  0015c5c0  2**2
+ 21 .debug_frame  000065bc  00000000  00000000  0015c568  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 22 .debug_line_str 00000066  00000000  00000000  00162b7c  2**0
+ 22 .debug_line_str 00000066  00000000  00000000  00162b24  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 23 .debug_loc    00002fbb  00000000  00000000  00162be2  2**0
+ 23 .debug_loc    00002fbb  00000000  00000000  00162b8a  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 24 .debug_ranges 000000d0  00000000  00000000  00165b9d  2**0
+ 24 .debug_ranges 000000d0  00000000  00000000  00165b45  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1090,10 +1090,10 @@ void StartDMATask(void *argument)
  8000798:	20000238 	.word	0x20000238
 
 0800079c <StartfftTaskTask>:
-#define INITIALIZATION		0U
-#define FIRST_HALF			1U
-#define SECOND_HALF			2U
-
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartfftTaskTask */
 void StartfftTaskTask(void *argument)
 {
  800079c:	b580      	push	{r7, lr}
