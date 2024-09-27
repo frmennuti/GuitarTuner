@@ -629,7 +629,7 @@ void elaborateFftData(void *argument)
 		  //must be evaluated in order to recover the tones strength
 		  //frequency bins must be evaluated
 		  //after that data shall be sent through USB communication
-		  for(int32_t cnt = 0; cnt < (ADC_BUFFER_LENGTH-2); cnt += 2)
+		  for(int32_t cnt = 0; cnt < (ADC_BUFFER_LENGTH-2); cnt + 2)
 		  {
 			  fft_out[cnt/2].mag = calc_magnitude(fft_buffer_result[cnt],fft_buffer_result[cnt+1]);
 		  }

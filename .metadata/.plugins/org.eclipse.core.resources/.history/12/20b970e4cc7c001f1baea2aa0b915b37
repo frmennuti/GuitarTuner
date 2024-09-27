@@ -30,20 +30,11 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-  /**
-   * @brief Output structure for fft data communication
-   */
-  typedef struct
-  {
-	  float mag;
-	  float frq;
-  } FFt_out;
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define SAMPLING_FREQUENCY_HZ 5120
-
 #define ADC_BUFFER_LENGTH 2048
 #define PARK_BUFFER_LENGTH (ADC_BUFFER_LENGTH / 2)
 #define FFT_BUFFER_LENGTH ADC_BUFFER_LENGTH
@@ -94,8 +85,6 @@ float fft_buffer_result [FFT_BUFFER_LENGTH];
 arm_rfft_fast_instance_f32 fftHandler;
 
 uint8_t fftFlag = 0;
-
-FFt_out fft_out[ADC_BUFFER_LENGTH/2];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -108,18 +97,15 @@ static void MX_TIM6_Init(void);
 static void MX_TIM7_Init(void);
 void StartDMATask(void *argument);
 void StartfftTaskTask(void *argument);
-void elaborateFftData(void *argument);
+void alaborateFftData(void *argument);
 
 /* USER CODE BEGIN PFP */
-float calc_magnitude(float real_part, float img_part);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-float calc_magnitude(float real_part, float img_part)
-{
-	return sqrt(real_part*real_part + img_part*img_part);
-}
+
 /* USER CODE END 0 */
 
 /**
@@ -188,7 +174,7 @@ int main(void)
   fftTaskHandle = osThreadNew(StartfftTaskTask, NULL, &fftTask_attributes);
 
   /* creation of elaborateFftDat */
-  elaborateFftDatHandle = osThreadNew(elaborateFftData, NULL, &elaborateFftDat_attributes);
+  elaborateFftDatHandle = osThreadNew(alaborateFftData, NULL, &elaborateFftDat_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -593,7 +579,7 @@ void StartfftTaskTask(void *argument)
 		  //eseguire la fft
 		  arm_rfft_fast_f32(&fftHandler, fft_buffer, fft_buffer_result, 0);
 
-		  xTaskNotifyGive(elaborateFftDatHandle);
+		  //xTaskNotifyGive(fftTaskHandle);
 	  }
 	  else
 		  HAL_GPIO_TogglePin(GPIOA, Trace1_Pin);
@@ -601,41 +587,20 @@ void StartfftTaskTask(void *argument)
   /* USER CODE END StartfftTaskTask */
 }
 
-/* USER CODE BEGIN Header_elaborateFftData */
+/* USER CODE BEGIN Header_alaborateFftData */
 /**
 * @brief Function implementing the elaborateFftDat thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_elaborateFftData */
-void elaborateFftData(void *argument)
+/* USER CODE END Header_alaborateFftData */
+void alaborateFftData(void *argument)
 {
   /* USER CODE BEGIN alaborateFftData */
-  uint32_t fftnotificationValue;
-
-  //inizializzo il campo contenente i bin della frequenza, non devo
-  //ricalcolarlo ogni volta ma solo la prima
-  for(int32_t cnt = 0; cnt < ADC_BUFFER_LENGTH/2; cnt++)
-  {
-	  fft_out[cnt/2].frq = (cnt*SAMPLING_FREQUENCY_HZ)/ADC_BUFFER_LENGTH;
-  }
   /* Infinite loop */
   for(;;)
   {
-	  fftnotificationValue = ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-	  if(fftnotificationValue == 1)
-	  {
-		  //fft_buffer_result contains imaginary numbers, the magnitude
-		  //must be evaluated in order to recover the tones strength
-		  //frequency bins must be evaluated
-		  //after that data shall be sent through USB communication
-		  for(int32_t cnt = 0; cnt < (ADC_BUFFER_LENGTH-2); cnt += 2)
-		  {
-			  fft_out[cnt/2].mag = calc_magnitude(fft_buffer_result[cnt],fft_buffer_result[cnt+1]);
-		  }
-	  }
-	  else
-		  HAL_GPIO_TogglePin(GPIOA, Trace1_Pin);
+    osDelay(1);
   }
   /* USER CODE END alaborateFftData */
 }

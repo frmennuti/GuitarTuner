@@ -35,8 +35,8 @@
    */
   typedef struct
   {
-	  float mag;
-	  float frq;
+	  uint32_t mag;
+	  uint32_t frq;
   } FFt_out;
 /* USER CODE END PTD */
 
@@ -111,15 +111,12 @@ void StartfftTaskTask(void *argument);
 void elaborateFftData(void *argument);
 
 /* USER CODE BEGIN PFP */
-float calc_magnitude(float real_part, float img_part);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-float calc_magnitude(float real_part, float img_part)
-{
-	return sqrt(real_part*real_part + img_part*img_part);
-}
+
 /* USER CODE END 0 */
 
 /**
@@ -612,13 +609,6 @@ void elaborateFftData(void *argument)
 {
   /* USER CODE BEGIN alaborateFftData */
   uint32_t fftnotificationValue;
-
-  //inizializzo il campo contenente i bin della frequenza, non devo
-  //ricalcolarlo ogni volta ma solo la prima
-  for(int32_t cnt = 0; cnt < ADC_BUFFER_LENGTH/2; cnt++)
-  {
-	  fft_out[cnt/2].frq = (cnt*SAMPLING_FREQUENCY_HZ)/ADC_BUFFER_LENGTH;
-  }
   /* Infinite loop */
   for(;;)
   {
@@ -629,9 +619,10 @@ void elaborateFftData(void *argument)
 		  //must be evaluated in order to recover the tones strength
 		  //frequency bins must be evaluated
 		  //after that data shall be sent through USB communication
-		  for(int32_t cnt = 0; cnt < (ADC_BUFFER_LENGTH-2); cnt += 2)
+		  for(int32_t cnt = 0; cnt < ADC_BUFFER_LENGTH-2; cnt + 2)
 		  {
-			  fft_out[cnt/2].mag = calc_magnitude(fft_buffer_result[cnt],fft_buffer_result[cnt+1]);
+			  fft_out[cnt/2].mag = fft_buffer_result[cnt] + fft_buffer_result[cnt+1];
+			  fft_out[cnt/2].frq = 0;
 		  }
 	  }
 	  else

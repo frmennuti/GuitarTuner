@@ -1,20 +1,22 @@
-14:24:55 **** Incremental Build of configuration Debug for project GuitarTuner ****
+15:57:32 **** Incremental Build of configuration Debug for project GuitarTuner ****
 make -j12 all 
 arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F303xE -c -I../Core/Inc -I../Drivers/STM32F3xx_HAL_Driver/Inc -I../Drivers/STM32F3xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F3xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F -I../Middlewares/ST/ARM/DSP/Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
-../Core/Src/main.c:77:1: error: unknown type name 'arm_rfft_fast_instance_f32'
-   77 | arm_rfft_fast_instance_f32 fftHandler;
-      | ^~~~~~~~~~~~~~~~~~~~~~~~~~
-../Core/Src/main.c: In function 'main':
-../Core/Src/main.c:138:3: warning: implicit declaration of function 'arm_rfft_fast_init_f32' [-Wimplicit-function-declaration]
-  138 |   arm_rfft_fast_init_f32(&fftHandler, FFT_BUFFER_LENGTH);
-      |   ^~~~~~~~~~~~~~~~~~~~~~
-../Core/Src/main.c: In function 'StartfftTaskTask':
-../Core/Src/main.c:568:19: warning: implicit declaration of function 'arm_rfft_fast_f32' [-Wimplicit-function-declaration]
-  568 |                   arm_rfft_fast_f32(&fftHandler, fft_buffer, fft_buffer_result, 0);
-      |                   ^~~~~~~~~~~~~~~~~
-make: *** [Core/Src/subdir.mk:40: Core/Src/main.o] Error 1
-"make -j12 all" terminated with exit code 2. Build might be incomplete.
-14:25:58 **** Incremental Build of configuration Debug for project GuitarTuner ****
+../Core/Src/main.c: In function 'elaborateFftData':
+../Core/Src/main.c:632:73: warning: statement with no effect [-Wunused-value]
+  632 |                   for(int32_t cnt = 0; cnt < (ADC_BUFFER_LENGTH-2); cnt + 2)
+      |                                                                     ~~~~^~~
+arm-none-eabi-gcc -o "GuitarTuner.elf" @"objects.list"  -l:libarm_cortexM4lf_math.a -mcpu=cortex-m4 -T"C:\Users\frmen\Documents\GitHub\GuitarTuner\GuitarTuner\STM32F303RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="GuitarTuner.map" -Wl,--gc-sections -static -L../Middlewares/ST/ARM/DSP/Lib --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: GuitarTuner.elf
+ 
+arm-none-eabi-size  GuitarTuner.elf 
+arm-none-eabi-objdump -h -S GuitarTuner.elf  > "GuitarTuner.list"
+   text	   data	    bss	    dec	    hex	filename
+ 160084	    120	  41832	 202036	  31534	GuitarTuner.elf
+Finished building: default.size.stdout
+ 
+Finished building: GuitarTuner.list
+ 
+16:36:10 **** Incremental Build of configuration Debug for project GuitarTuner ****
 make -j12 all 
 arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F303xE -c -I../Core/Inc -I../Drivers/STM32F3xx_HAL_Driver/Inc -I../Drivers/STM32F3xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F3xx/Include -I../Drivers/CMSIS/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F -I../Middlewares/ST/ARM/DSP/Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
 arm-none-eabi-gcc -o "GuitarTuner.elf" @"objects.list"  -l:libarm_cortexM4lf_math.a -mcpu=cortex-m4 -T"C:\Users\frmen\Documents\GitHub\GuitarTuner\GuitarTuner\STM32F303RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="GuitarTuner.map" -Wl,--gc-sections -static -L../Middlewares/ST/ARM/DSP/Lib --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
@@ -23,7 +25,7 @@ Finished building target: GuitarTuner.elf
 arm-none-eabi-size  GuitarTuner.elf 
 arm-none-eabi-objdump -h -S GuitarTuner.elf  > "GuitarTuner.list"
    text	   data	    bss	    dec	    hex	filename
- 156744	    100	  33636	 190480	  2e810	GuitarTuner.elf
+ 160084	    120	  41832	 202036	  31534	GuitarTuner.elf
 Finished building: default.size.stdout
  
 Finished building: GuitarTuner.list
