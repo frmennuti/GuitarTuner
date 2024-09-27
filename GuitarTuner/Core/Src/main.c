@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "usb_device.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -63,8 +64,6 @@ TIM_HandleTypeDef htim7;
 
 UART_HandleTypeDef huart2;
 
-PCD_HandleTypeDef hpcd_USB_FS;
-
 /* Definitions for DMATask */
 osThreadId_t DMATaskHandle;
 const osThreadAttr_t DMATask_attributes = {
@@ -108,7 +107,6 @@ static void MX_USART2_UART_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_TIM6_Init(void);
 static void MX_TIM7_Init(void);
-static void MX_USB_PCD_Init(void);
 void StartDMATask(void *argument);
 void StartfftTaskTask(void *argument);
 void elaborateFftData(void *argument);
@@ -161,7 +159,6 @@ int main(void)
   MX_ADC1_Init();
   MX_TIM6_Init();
   MX_TIM7_Init();
-  MX_USB_PCD_Init();
   /* USER CODE BEGIN 2 */
 
   arm_rfft_fast_init_f32(&fftHandler, FFT_BUFFER_LENGTH);
@@ -449,38 +446,6 @@ static void MX_USART2_UART_Init(void)
 }
 
 /**
-  * @brief USB Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_USB_PCD_Init(void)
-{
-
-  /* USER CODE BEGIN USB_Init 0 */
-
-  /* USER CODE END USB_Init 0 */
-
-  /* USER CODE BEGIN USB_Init 1 */
-
-  /* USER CODE END USB_Init 1 */
-  hpcd_USB_FS.Instance = USB;
-  hpcd_USB_FS.Init.dev_endpoints = 8;
-  hpcd_USB_FS.Init.speed = PCD_SPEED_FULL;
-  hpcd_USB_FS.Init.phy_itface = PCD_PHY_EMBEDDED;
-  hpcd_USB_FS.Init.low_power_enable = DISABLE;
-  hpcd_USB_FS.Init.lpm_enable = DISABLE;
-  hpcd_USB_FS.Init.battery_charging_enable = DISABLE;
-  if (HAL_PCD_Init(&hpcd_USB_FS) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USB_Init 2 */
-
-  /* USER CODE END USB_Init 2 */
-
-}
-
-/**
   * Enable DMA controller clock
   */
 static void MX_DMA_Init(void)
@@ -571,6 +536,8 @@ void  HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 /* USER CODE END Header_StartDMATask */
 void StartDMATask(void *argument)
 {
+  /* init code for USB_DEVICE */
+  MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 5 */
   static bool sampled_first_half = true;
 
