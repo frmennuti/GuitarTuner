@@ -125,6 +125,19 @@ float calc_magnitude(float real_part, float img_part)
 	return sqrt(real_part*real_part + img_part*img_part);
 }
 
+/*
+ *
+ * used for debug purposes
+ *
+ * */
+void vApplicationIdleHook(void) {
+    // Toggle the GPIO pin
+	//debug
+	HAL_GPIO_TogglePin(TraceIdle_GPIO_Port, TraceIdle_Pin);
+
+    // Optional: Introduce a small delay if you want to control the toggle rate
+    // HAL_Delay(100);  // This would block the Idle Task, avoid if you need accurate timing
+}
 /* USER CODE END 0 */
 
 /**

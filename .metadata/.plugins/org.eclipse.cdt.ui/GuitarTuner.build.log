@@ -1,10 +1,10 @@
-17:33:31 **** Incremental Build of configuration Debug for project GuitarTuner ****
+18:01:16 **** Incremental Build of configuration Debug for project GuitarTuner ****
 make -j12 all 
 arm-none-eabi-size  GuitarTuner.elf 
    text	   data	    bss	    dec	    hex	filename
- 160756	    120	  42552	 203428	  31aa4	GuitarTuner.elf
+ 160820	    120	  42552	 203492	  31ae4	GuitarTuner.elf
 Finished building: default.size.stdout
  
 
-17:33:31 Build Finished. 0 errors, 0 warnings. (took 309ms)
+18:01:16 Build Finished. 0 errors, 0 warnings. (took 305ms)
 

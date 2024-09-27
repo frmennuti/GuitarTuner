@@ -119,12 +119,10 @@ float calc_magnitude(float real_part, float img_part);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
 float calc_magnitude(float real_part, float img_part)
 {
 	return sqrt(real_part*real_part + img_part*img_part);
 }
-
 /* USER CODE END 0 */
 
 /**
@@ -710,7 +708,8 @@ void elaborateFftData(void *argument)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
-
+  //debug
+  HAL_GPIO_TogglePin(GPIOA, TraceIdle_Pin);
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM1) {
     HAL_IncTick();
