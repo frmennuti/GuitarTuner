@@ -67,6 +67,8 @@ void Error_Handler(void);
 #define Trace0_GPIO_Port GPIOA
 #define Trace1_Pin GPIO_PIN_6
 #define Trace1_GPIO_Port GPIOA
+#define Trace2_Pin GPIO_PIN_7
+#define Trace2_GPIO_Port GPIOA
 #define TMS_Pin GPIO_PIN_13
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
